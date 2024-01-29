@@ -39,37 +39,45 @@ class Server:
             }
         return self.__indexed_dataset
 
-    def get_hyper_index(self, index: int = None,
-                        page_size: int = 10) -> Dict:
-        """This is the get_hyper_index"""
-        assert index is None or (
-                isinstance(index, int) and index >= 0), "Invalid index"
-        assert isinstance(page_size,
-                          int) and page_size > 0, "Page size must be a " \
-                                                  "positive integer"
+    def get_hyper_index(self, index: int = 0, page_size: int = 10) -> Dict:
+        """
+        Returns a dictionary with the current start index of the return page,
+        the next index to query with, the current page size, and the actual page of the dataset.
 
-        # If index is None, set it to 0
-        index = index or 0
+        Parameters:
+        index (int): The current start index of the return page. Default is 0.
+        page_size (int): The current page size. Default is 10.
 
-        # Get the dataset
-        dataset = self.dataset()
+        Returns:
+        dict: A dictionary with the following key-value pairs:
+            - 'index': The current start index of the return page.
+            - 'next_index': The next index to query with.
+            - 'page_size': The current page size.
+            - 'data': The actual page of the dataset.
+        """
 
-        # Verify that the index is in a valid range
-        assert index < len(dataset), "Index out of range"
+        # Verify that index is in a valid range
+        assert isinstance(index, int) and index >= 0
+        assert isinstance(page_size, int) and page_size > 0
 
-        # Calculate the start and end indexes for the current page
-        start_index = index
-        end_index = min(index + page_size, len(dataset))
+        dataset = self.indexed_dataset()
+        dataset_size = len(dataset)
 
-        # Get the actual page of the dataset
-        data = dataset[start_index:end_index]
+        # Verify that index is less than the size of the dataset
+        assert index < dataset_size
 
-        # Calculate the next index to query with
-        next_index = end_index if end_index < len(dataset) else None
+        data = []
+        next_index = index
+
+        # Collect page_size number of items from the indexed dataset
+        while len(data) < page_size and next_index < dataset_size:
+            if next_index in dataset:
+                data.append(dataset[next_index])
+            next_index += 1
 
         return {
-            'index': start_index,
+            'index': index,
             'next_index': next_index,
-            'page_size': len(data),
-            'data': data
+            'page_size': page_size,
+            'data': data,
         }
