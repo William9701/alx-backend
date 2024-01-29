@@ -41,6 +41,7 @@ class Server:
 
     def get_hyper_index(self, index: int = None,
                         page_size: int = 10) -> Dict:
+        """This is the get_hyper_index"""
         assert index is None or (
                 isinstance(index, int) and index >= 0), "Invalid index"
         assert isinstance(page_size,
